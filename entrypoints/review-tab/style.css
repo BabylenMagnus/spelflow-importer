@@ -1,0 +1,200 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #24292f;
+  background-color: #f6f8fa;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.selector-group {
+  display: flex;
+  gap: 8px;
+}
+
+.select {
+  padding: 5px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid rgba(27, 31, 36, 0.15);
+  border-radius: 6px;
+  background-color: #f6f8fa;
+  color: #24292f;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 16px;
+  color: #57606a;
+  font-size: 15px;
+}
+
+.issue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.issue-card {
+  background: #ffffff;
+  border: 1px solid rgba(27, 31, 36, 0.15);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.issue-card.done {
+  opacity: 0.6;
+}
+
+.issue-card.error {
+  border-color: #cf222e;
+}
+
+.issue-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.issue-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.issue-meta {
+  font-size: 12px;
+  color: #57606a;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.provider-badge {
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #ddf4ff;
+  color: #0550ae;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.issue-status {
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 80px;
+  text-align: right;
+}
+
+.status-pending { color: #57606a; }
+.status-importing { color: #9a6700; }
+.status-done { color: #2da44e; }
+.status-error { color: #cf222e; }
+
+.issue-link {
+  font-size: 12px;
+  color: #0969da;
+  text-decoration: none;
+}
+
+.issue-link:hover {
+  text-decoration: underline;
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #57606a;
+  font-size: 16px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.btn-remove:hover {
+  color: #cf222e;
+}
+
+.btn-primary,
+.btn-danger {
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid rgba(27, 31, 36, 0.15);
+  transition: background-color 0.1s;
+}
+
+.btn-primary {
+  background-color: #2da44e;
+  color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2c974b;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background-color: #f6f8fa;
+  color: #cf222e;
+}
+
+.btn-danger:hover {
+  background-color: #fff0ee;
+}

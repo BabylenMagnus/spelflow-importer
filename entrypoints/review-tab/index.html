@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spelflow — Review Basket</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Review Basket</h1>
+      <div class="header-actions">
+        <div id="workspace-selector" class="selector-group hidden">
+          <select id="sel-workspace" class="select"></select>
+          <select id="sel-project" class="select"></select>
+        </div>
+        <button id="btn-import-all" class="btn-primary" disabled>Import all</button>
+        <button id="btn-clear" class="btn-danger">Clear basket</button>
+      </div>
+    </header>
+
+    <div id="state-empty" class="empty-state hidden">
+      <p>No issues in basket. Go to GitHub and click "Capture to Spelflow".</p>
+    </div>
+
+    <div id="state-not-connected" class="empty-state hidden">
+      <p>Not connected to Spelflow. Open the extension popup to connect.</p>
+    </div>
+
+    <div id="issue-list" class="issue-list"></div>
+  </div>
+  <script type="module" src="main.ts"></script>
+</body>
+</html>
