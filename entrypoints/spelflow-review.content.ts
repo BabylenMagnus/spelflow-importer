@@ -4,6 +4,7 @@ import type { CapturedIssue } from '../utils/types';
 
 export default defineContentScript({
   matches: ['*://spelflow.ru/extension/review*'],
+  runAt: 'document_end',
   async main() {
     function send(msg: Record<string, unknown>) {
       window.postMessage({ source: 'spelflow-ext', ...msg }, '*');

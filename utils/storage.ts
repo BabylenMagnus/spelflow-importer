@@ -10,7 +10,7 @@ export const connectedAccount = storage.defineItem<{ name: string; email: string
   { defaultValue: null }
 );
 
-export const reviewBasket = storage.defineItem<CapturedIssue[]>('session:reviewBasket', {
+export const reviewBasket = storage.defineItem<CapturedIssue[]>('local:reviewBasket', {
   defaultValue: [],
 });
 
