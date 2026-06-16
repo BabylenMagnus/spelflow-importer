@@ -27,6 +27,7 @@ export default defineContentScript({
         const saved = await lastWorkspace.getValue();
         const firstWs = saved ?? wsList[0];
         if (firstWs) {
+          if (!saved) await lastWorkspace.setValue(firstWs);
           const pjList = await getProjects(firstWs.url);
           send({ type: 'SF_PROJECTS', projects: pjList });
         }
@@ -90,6 +91,7 @@ export default defineContentScript({
           const saved = await lastWorkspace.getValue();
           const firstWs = saved ?? wsList[0];
           if (firstWs) {
+            if (!saved) await lastWorkspace.setValue(firstWs);
             const pjList = await getProjects(firstWs.url);
             send({ type: 'SF_PROJECTS', projects: pjList });
           }
