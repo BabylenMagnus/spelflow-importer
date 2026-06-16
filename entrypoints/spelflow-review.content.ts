@@ -31,7 +31,7 @@ export default defineContentScript({
           send({ type: 'SF_PROJECTS', projects: pjList });
         }
       } catch {
-        // workspaces failed — basket still shown
+        send({ type: 'SF_WORKSPACES_ERROR' });
       }
     }
 
@@ -80,6 +80,21 @@ export default defineContentScript({
             ok: false,
             error: err instanceof Error ? err.message : 'Import failed',
           });
+        }
+      }
+
+      if (d.type === 'SF_RETRY_WORKSPACES') {
+        try {
+          const wsList = await getWorkspaces();
+          send({ type: 'SF_WORKSPACES', workspaces: wsList });
+          const saved = await lastWorkspace.getValue();
+          const firstWs = saved ?? wsList[0];
+          if (firstWs) {
+            const pjList = await getProjects(firstWs.url);
+            send({ type: 'SF_PROJECTS', projects: pjList });
+          }
+        } catch {
+          send({ type: 'SF_WORKSPACES_ERROR' });
         }
       }
 
