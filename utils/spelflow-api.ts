@@ -1,7 +1,7 @@
 import { getAuthToken } from './auth';
 import type { CapturedIssue, SpelflowWorkspace, SpelflowProject } from './types';
 
-const BASE = 'https://spelflow.ru/account/api/v1';
+const BASE = 'https://app.spelflow.ru/account/api/v1';
 
 async function authFetch(path: string, options?: RequestInit): Promise<Response> {
   const token = await getAuthToken();
