@@ -39,11 +39,7 @@ export async function createIssue(
 
   const res = await authFetch(`/workspaces/${workspaceUrl}/issues`, {
     method: 'POST',
-    body: JSON.stringify({
-      title: issue.title,
-      project: projectIdentifier,
-      description,
-    }),
+    body: JSON.stringify({ title: issue.title, project: projectIdentifier, description }),
   });
   if (!res.ok) throw new Error(`createIssue failed: ${res.status} ${await res.text()}`);
   return res.json();
