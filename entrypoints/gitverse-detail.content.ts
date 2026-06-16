@@ -1,5 +1,5 @@
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
-import { reviewBasket } from '../utils/storage';
+import { reviewBasket, lastWorkspace } from '../utils/storage';
 import type { CapturedIssue } from '../utils/types';
 
 export default defineContentScript({
@@ -150,8 +150,9 @@ function injectCaptureButton() {
   openBtn.style.cssText = OPEN_STYLE + ';display:none';
   openBtn.addEventListener('mouseenter', () => { openBtn.style.background = 'oklch(0.17 0.003 193)'; });
   openBtn.addEventListener('mouseleave', () => { openBtn.style.background = 'oklch(0.13 0.003 193)'; });
-  openBtn.addEventListener('click', () => {
-    browser.runtime.sendMessage({ type: 'open-review-tab' });
+  openBtn.addEventListener('click', async () => {
+    const ws = await lastWorkspace.getValue();
+    browser.runtime.sendMessage({ type: 'open-review-tab', workspaceUrl: ws?.url });
   });
 
   captureBtn.addEventListener('click', async () => {

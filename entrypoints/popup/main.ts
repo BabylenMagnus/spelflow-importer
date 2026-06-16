@@ -1,5 +1,5 @@
 import './style.css';
-import { authToken, connectedAccount, reviewBasket } from '../../utils/storage';
+import { authToken, connectedAccount, reviewBasket, lastWorkspace } from '../../utils/storage';
 import { connectToSpelflow, disconnectFromSpelflow } from '../../utils/auth';
 
 function show(id: string) {
@@ -43,8 +43,9 @@ document.getElementById('btn-disconnect')?.addEventListener('click', async () =>
   await render();
 });
 
-document.getElementById('btn-open-review')?.addEventListener('click', () => {
-  browser.runtime.sendMessage({ type: 'open-review-tab' });
+document.getElementById('btn-open-review')?.addEventListener('click', async () => {
+  const ws = await lastWorkspace.getValue();
+  browser.runtime.sendMessage({ type: 'open-review-tab', workspaceUrl: ws?.url });
   window.close();
 });
 

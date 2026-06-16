@@ -1,7 +1,10 @@
 export default defineBackground(() => {
-  browser.runtime.onMessage.addListener((message: { type: string }) => {
+  browser.runtime.onMessage.addListener((message: { type: string; workspaceUrl?: string }) => {
     if (message.type === 'open-review-tab') {
-      browser.tabs.create({ url: 'https://app.spelflow.ru/extension/review' });
+      const url = message.workspaceUrl
+        ? `https://app.spelflow.ru/workbench/${message.workspaceUrl}/extension`
+        : 'https://app.spelflow.ru/extension/review';
+      browser.tabs.create({ url });
     }
   });
 });
