@@ -3,7 +3,7 @@ import { getWorkspaces, getProjects, createIssue } from '../utils/spelflow-api';
 import type { CapturedIssue } from '../utils/types';
 
 export default defineContentScript({
-  matches: ['*://app.spelflow.ru/extension/review*', '*://app.spelflow.ru/workbench/*/extension*'],
+  matches: ['*://app.spelflow.ru/workbench/*/extension*'],
   runAt: 'document_end',
   async main() {
     function send(msg: Record<string, unknown>) {

@@ -3,7 +3,7 @@ export default defineBackground(() => {
     if (message.type === 'open-review-tab') {
       const url = message.workspaceUrl
         ? `https://app.spelflow.ru/workbench/${message.workspaceUrl}/extension`
-        : 'https://app.spelflow.ru/extension/review';
+        : 'https://app.spelflow.ru';
       browser.tabs.create({ url });
     }
   });
