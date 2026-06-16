@@ -196,7 +196,7 @@ async function importAll() {
     try {
       const result = await createIssue(wsUrl, projectId, state.issue);
       state.status = 'done';
-      state.spelflowUrl = `https://spelflow.ru/account/${wsUrl}/issue/${result.identifier}`;
+      state.spelflowUrl = `https://app.spelflow.ru/workbench/${wsUrl}/tracker/${result.identifier}`;
     } catch (err) {
       state.status = 'error';
       state.errorMessage = err instanceof Error ? err.message : 'Unknown error';

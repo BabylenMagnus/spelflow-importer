@@ -3,7 +3,7 @@ import { getWorkspaces, getProjects, createIssue } from '../utils/spelflow-api';
 import type { CapturedIssue } from '../utils/types';
 
 export default defineContentScript({
-  matches: ['*://spelflow.ru/extension/review*'],
+  matches: ['*://app.spelflow.ru/extension/review*'],
   runAt: 'document_end',
   async main() {
     function send(msg: Record<string, unknown>) {
@@ -64,7 +64,7 @@ export default defineContentScript({
           const wsList = await getWorkspaces();
           const ws = wsList.find((w) => w.url === workspace);
           const spelflowUrl = ws
-            ? `https://spelflow.ru/workbench/${workspace}/tracker/${result.identifier}`
+            ? `https://app.spelflow.ru/workbench/${workspace}/tracker/${result.identifier}`
             : undefined;
           send({ type: 'SF_IMPORT_RESULT', index, ok: true, spelflowUrl });
 

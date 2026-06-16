@@ -9,6 +9,7 @@ export default defineConfig({
       '*://github.com/*',
       '*://gitverse.ru/*',
       'https://spelflow.ru/*',
+      'https://app.spelflow.ru/*',
     ],
     action: {},
   },

@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spelflow Importer</title>
+  <title>Spelflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,19 +17,23 @@
         <span id="account-name" class="account-name"></span>
       </div>
       <p id="basket-count" class="basket-count"></p>
-      <button id="btn-open-review" class="btn-primary">Open Review Tab</button>
-      <button id="btn-disconnect" class="btn-secondary">Disconnect</button>
+      <button id="btn-open-review" class="btn-primary">Открыть корзину</button>
+      <button id="btn-disconnect" class="btn-ghost">Отключиться</button>
     </div>
     <div id="state-disconnected">
-      <p class="hint">Connect to Spelflow to start capturing issues.</p>
-      <button id="btn-connect" class="btn-primary">Connect to Spelflow</button>
+      <div class="brand-header">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Spelflow</span>
+      </div>
+      <p class="hint">Подключитесь, чтобы начать захватывать задачи.</p>
+      <button id="btn-connect" class="btn-primary">Подключить Spelflow</button>
     </div>
     <div id="state-loading" class="hidden">
-      <p class="hint">Connecting...</p>
+      <p class="hint">Подключение...</p>
     </div>
     <div id="state-error" class="hidden">
       <p id="error-message" class="error"></p>
-      <button id="btn-retry" class="btn-secondary">Try again</button>
+      <button id="btn-retry" class="btn-ghost">Попробовать снова</button>
     </div>
   </div>
   <script type="module" src="main.ts"></script>

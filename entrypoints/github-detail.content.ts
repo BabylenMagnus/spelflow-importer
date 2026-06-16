@@ -20,7 +20,6 @@ function extractIssue(): CapturedIssue | null {
   if (!title) return null;
 
   const pathParts = location.pathname.split('/');
-  // /owner/repo/issues/123
   const numberStr = pathParts[4];
   if (!numberStr) return null;
   const issueNumber = parseInt(numberStr, 10);
@@ -44,48 +43,119 @@ function extractIssue(): CapturedIssue | null {
   };
 }
 
+const BTN_STYLE = [
+  'position:fixed',
+  'bottom:24px',
+  'right:24px',
+  'z-index:9999',
+  'display:flex',
+  'align-items:center',
+  'gap:0',
+  'border-radius:6px',
+  'box-shadow:0 2px 12px oklch(0 0 0 / 0.35)',
+  'font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,sans-serif',
+  'overflow:hidden',
+].join(';');
+
+const CAPTURE_STYLE = [
+  'padding:8px 16px',
+  'background:oklch(0.50 0.18 193)',
+  'color:#fff',
+  'border:none',
+  'font-size:13px',
+  'font-weight:500',
+  'cursor:pointer',
+  'line-height:20px',
+  'transition:background-color 0.1s',
+  '-webkit-font-smoothing:antialiased',
+].join(';');
+
+const OPEN_STYLE = [
+  'padding:8px 14px',
+  'background:oklch(0.13 0.003 193)',
+  'color:oklch(0.83 0.14 193)',
+  'border:none',
+  'border-left:1px solid oklch(0.22 0.005 193)',
+  'font-size:12px',
+  'font-weight:500',
+  'cursor:pointer',
+  'line-height:20px',
+  'white-space:nowrap',
+  'transition:background-color 0.1s',
+  '-webkit-font-smoothing:antialiased',
+].join(';');
+
 function injectCaptureButton() {
-  if (document.getElementById('spelflow-capture-btn')) return;
+  if (document.getElementById('spelflow-wrap')) return;
 
-  const btn = document.createElement('button');
-  btn.id = 'spelflow-capture-btn';
-  btn.textContent = 'Capture to Spelflow';
-  btn.style.cssText = [
-    'position:fixed',
-    'bottom:24px',
-    'right:24px',
-    'z-index:9999',
-    'padding:8px 16px',
-    'background:#2da44e',
-    'color:#fff',
-    'border:none',
-    'border-radius:6px',
-    'font-size:14px',
-    'font-weight:600',
-    'cursor:pointer',
-    'box-shadow:0 2px 8px rgba(0,0,0,0.2)',
-  ].join(';');
+  const wrap = document.createElement('div');
+  wrap.id = 'spelflow-wrap';
+  wrap.style.cssText = BTN_STYLE;
 
-  btn.addEventListener('click', async () => {
+  const captureBtn = document.createElement('button');
+  captureBtn.id = 'spelflow-capture-btn';
+  captureBtn.textContent = 'Capture to Spelflow';
+  captureBtn.style.cssText = CAPTURE_STYLE;
+  captureBtn.addEventListener('mouseenter', () => { captureBtn.style.background = 'oklch(0.44 0.18 193)'; });
+  captureBtn.addEventListener('mouseleave', () => {
+    if (!captureBtn.dataset['captured']) captureBtn.style.background = 'oklch(0.50 0.18 193)';
+  });
+
+  const openBtn = document.createElement('button');
+  openBtn.id = 'spelflow-open-btn';
+  openBtn.textContent = 'Открыть корзину →';
+  openBtn.style.cssText = OPEN_STYLE + ';display:none';
+  openBtn.addEventListener('mouseenter', () => { openBtn.style.background = 'oklch(0.17 0.003 193)'; });
+  openBtn.addEventListener('mouseleave', () => { openBtn.style.background = 'oklch(0.13 0.003 193)'; });
+  openBtn.addEventListener('click', () => {
+    browser.runtime.sendMessage({ type: 'open-review-tab' });
+  });
+
+  captureBtn.addEventListener('click', async () => {
     const issue = extractIssue();
     if (!issue) {
-      btn.textContent = 'Could not capture';
-      setTimeout(() => (btn.textContent = 'Capture to Spelflow'), 2000);
+      showFeedback(captureBtn, 'Не удалось захватить', 'oklch(0.62 0.22 25)');
       return;
     }
 
     const basket = await reviewBasket.getValue();
     const alreadyIn = basket.some((i) => i.externalUrl === issue.externalUrl);
+
     if (alreadyIn) {
-      btn.textContent = 'Already in basket';
-      setTimeout(() => (btn.textContent = 'Capture to Spelflow'), 2000);
+      showCaptured(captureBtn, openBtn, 'Уже в корзине');
       return;
     }
 
     await reviewBasket.setValue([...basket, issue]);
-    btn.textContent = 'Captured!';
-    setTimeout(() => (btn.textContent = 'Capture to Spelflow'), 2000);
+    showCaptured(captureBtn, openBtn, '✓ Захвачено');
   });
 
-  document.body.appendChild(btn);
+  wrap.appendChild(captureBtn);
+  wrap.appendChild(openBtn);
+  document.body.appendChild(wrap);
+}
+
+function showCaptured(captureBtn: HTMLButtonElement, openBtn: HTMLButtonElement, label: string) {
+  captureBtn.textContent = label;
+  captureBtn.style.background = 'oklch(0.44 0.18 193)';
+  captureBtn.dataset['captured'] = '1';
+  openBtn.style.display = '';
+
+  setTimeout(() => {
+    captureBtn.textContent = 'Capture to Spelflow';
+    captureBtn.style.background = 'oklch(0.50 0.18 193)';
+    delete captureBtn.dataset['captured'];
+    openBtn.style.display = 'none';
+  }, 5000);
+}
+
+function showFeedback(btn: HTMLButtonElement, text: string, color: string) {
+  const prev = btn.textContent ?? '';
+  const prevBg = btn.style.background;
+  btn.textContent = text;
+  btn.style.background = color;
+  setTimeout(() => {
+    btn.textContent = prev;
+    btn.style.background = prevBg;
+  }, 2000);
 }

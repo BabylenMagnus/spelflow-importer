@@ -49,15 +49,20 @@ function injectListButtons() {
     btn.style.cssText = [
       'margin-left:8px',
       'padding:2px 8px',
-      'background:#2da44e',
+      'background:oklch(0.50 0.18 193)',
       'color:#fff',
       'border:none',
       'border-radius:4px',
       'font-size:12px',
-      'font-weight:600',
+      'font-weight:500',
       'cursor:pointer',
       'vertical-align:middle',
+      'font-family:"IBM Plex Sans",-apple-system,sans-serif',
+      'transition:background-color 0.1s',
     ].join(';');
+
+    btn.addEventListener('mouseenter', () => { btn.style.background = 'oklch(0.44 0.18 193)'; });
+    btn.addEventListener('mouseleave', () => { if (btn.textContent !== '✓') btn.style.background = 'oklch(0.50 0.18 193)'; });
 
     btn.addEventListener('click', async (e) => {
       e.preventDefault();

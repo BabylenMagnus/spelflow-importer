@@ -7,19 +7,16 @@ export default defineContentScript({
   async main(_ctx: ContentScriptContext) {
     if (!isTaskPage()) return;
 
-    // Wait for React to finish hydration before injecting.
-    // Hydration removes any DOM nodes we add during document_end.
     waitForHydration(() => {
       injectCaptureButton();
       keepButtonAlive();
     });
 
-    // Handle SPA navigation between tasks
     let lastUrl = location.href;
     new MutationObserver(() => {
       if (location.href === lastUrl) return;
       lastUrl = location.href;
-      document.getElementById('spelflow-capture-btn')?.remove();
+      document.getElementById('spelflow-wrap')?.remove();
       if (isTaskPage()) {
         waitForHydration(() => {
           injectCaptureButton();
@@ -30,41 +27,29 @@ export default defineContentScript({
   },
 });
 
-// Wait until Next.js finishes hydrating the page.
-// We detect this by watching for the <body> to stop changing rapidly.
 function waitForHydration(cb: () => void) {
   let timer: ReturnType<typeof setTimeout>;
   const observer = new MutationObserver(() => {
     clearTimeout(timer);
-    // Re-start 300ms quiet period timer on every DOM change
-    timer = setTimeout(() => {
-      observer.disconnect();
-      cb();
-    }, 300);
+    timer = setTimeout(() => { observer.disconnect(); cb(); }, 300);
   });
   observer.observe(document.body, { childList: true, subtree: true });
-  // Kick off with an initial 300ms delay in case page is already stable
-  timer = setTimeout(() => {
-    observer.disconnect();
-    cb();
-  }, 300);
+  timer = setTimeout(() => { observer.disconnect(); cb(); }, 300);
 }
 
-// If React removes our button (e.g. partial re-render), put it back.
 function keepButtonAlive() {
   let debounce: ReturnType<typeof setTimeout> | null = null;
   const observer = new MutationObserver(() => {
-    if (document.getElementById('spelflow-capture-btn')) return;
+    if (document.getElementById('spelflow-wrap')) return;
     if (!isTaskPage()) return;
     if (debounce) return;
     debounce = setTimeout(() => {
       debounce = null;
-      if (!document.getElementById('spelflow-capture-btn') && isTaskPage()) {
+      if (!document.getElementById('spelflow-wrap') && isTaskPage()) {
         injectCaptureButton();
       }
     }, 200);
   });
-  // Only watch direct children of body — that's where our button lives
   observer.observe(document.body, { childList: true });
 }
 
@@ -101,53 +86,119 @@ function extractIssue(): CapturedIssue | null {
   };
 }
 
+const BTN_STYLE = [
+  'position:fixed',
+  'bottom:24px',
+  'right:24px',
+  'z-index:2147483647',
+  'display:flex',
+  'align-items:center',
+  'gap:0',
+  'border-radius:6px',
+  'box-shadow:0 2px 12px oklch(0 0 0 / 0.40)',
+  'font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,sans-serif',
+  'overflow:hidden',
+].join(';');
+
+const CAPTURE_STYLE = [
+  'padding:8px 16px',
+  'background:oklch(0.50 0.18 193)',
+  'color:#fff',
+  'border:none',
+  'font-size:13px',
+  'font-weight:500',
+  'cursor:pointer',
+  'line-height:20px',
+  'transition:background-color 0.1s',
+  '-webkit-font-smoothing:antialiased',
+].join(';');
+
+const OPEN_STYLE = [
+  'padding:8px 14px',
+  'background:oklch(0.13 0.003 193)',
+  'color:oklch(0.83 0.14 193)',
+  'border:none',
+  'border-left:1px solid oklch(0.22 0.005 193)',
+  'font-size:12px',
+  'font-weight:500',
+  'cursor:pointer',
+  'line-height:20px',
+  'white-space:nowrap',
+  'transition:background-color 0.1s',
+  '-webkit-font-smoothing:antialiased',
+].join(';');
+
 function injectCaptureButton() {
-  if (document.getElementById('spelflow-capture-btn')) return;
+  if (document.getElementById('spelflow-wrap')) return;
 
-  const btn = document.createElement('button');
-  btn.id = 'spelflow-capture-btn';
-  btn.textContent = 'Capture to Spelflow';
-  btn.style.cssText = [
-    'position:fixed',
-    'bottom:24px',
-    'right:24px',
-    'z-index:2147483647',
-    'padding:8px 16px',
-    'background:#2da44e',
-    'color:#fff',
-    'border:none',
-    'border-radius:6px',
-    'font-size:14px',
-    'font-weight:600',
-    'cursor:pointer',
-    'box-shadow:0 2px 8px rgba(0,0,0,0.25)',
-    'font-family:system-ui,sans-serif',
-  ].join(';');
+  const wrap = document.createElement('div');
+  wrap.id = 'spelflow-wrap';
+  wrap.style.cssText = BTN_STYLE;
 
-  btn.addEventListener('mouseenter', () => { btn.style.background = '#2c974b'; });
-  btn.addEventListener('mouseleave', () => { btn.style.background = '#2da44e'; });
-
-  btn.addEventListener('click', async () => {
-    const issue = extractIssue();
-    if (!issue) {
-      btn.textContent = 'Could not capture';
-      setTimeout(() => (btn.textContent = 'Capture to Spelflow'), 2000);
-      return;
-    }
-    const basket = await reviewBasket.getValue();
-    if (basket.some((i) => i.externalUrl === issue.externalUrl)) {
-      btn.textContent = 'Already in basket';
-      setTimeout(() => (btn.textContent = 'Capture to Spelflow'), 2000);
-      return;
-    }
-    await reviewBasket.setValue([...basket, issue]);
-    btn.textContent = '✓ Captured!';
-    btn.style.background = '#1a7f37';
-    setTimeout(() => {
-      btn.textContent = 'Capture to Spelflow';
-      btn.style.background = '#2da44e';
-    }, 2000);
+  const captureBtn = document.createElement('button');
+  captureBtn.id = 'spelflow-capture-btn';
+  captureBtn.textContent = 'Capture to Spelflow';
+  captureBtn.style.cssText = CAPTURE_STYLE;
+  captureBtn.addEventListener('mouseenter', () => { captureBtn.style.background = 'oklch(0.44 0.18 193)'; });
+  captureBtn.addEventListener('mouseleave', () => {
+    if (!captureBtn.dataset['captured']) captureBtn.style.background = 'oklch(0.50 0.18 193)';
   });
 
-  document.body.appendChild(btn);
+  const openBtn = document.createElement('button');
+  openBtn.id = 'spelflow-open-btn';
+  openBtn.textContent = 'Открыть корзину →';
+  openBtn.style.cssText = OPEN_STYLE + ';display:none';
+  openBtn.addEventListener('mouseenter', () => { openBtn.style.background = 'oklch(0.17 0.003 193)'; });
+  openBtn.addEventListener('mouseleave', () => { openBtn.style.background = 'oklch(0.13 0.003 193)'; });
+  openBtn.addEventListener('click', () => {
+    browser.runtime.sendMessage({ type: 'open-review-tab' });
+  });
+
+  captureBtn.addEventListener('click', async () => {
+    const issue = extractIssue();
+    if (!issue) {
+      showFeedback(captureBtn, 'Не удалось захватить', 'oklch(0.62 0.22 25)');
+      return;
+    }
+
+    const basket = await reviewBasket.getValue();
+    const alreadyIn = basket.some((i) => i.externalUrl === issue.externalUrl);
+
+    if (alreadyIn) {
+      showCaptured(captureBtn, openBtn, 'Уже в корзине');
+      return;
+    }
+
+    await reviewBasket.setValue([...basket, issue]);
+    showCaptured(captureBtn, openBtn, '✓ Захвачено');
+  });
+
+  wrap.appendChild(captureBtn);
+  wrap.appendChild(openBtn);
+  document.body.appendChild(wrap);
+}
+
+function showCaptured(captureBtn: HTMLButtonElement, openBtn: HTMLButtonElement, label: string) {
+  captureBtn.textContent = label;
+  captureBtn.style.background = 'oklch(0.44 0.18 193)';
+  captureBtn.dataset['captured'] = '1';
+  openBtn.style.display = '';
+
+  setTimeout(() => {
+    captureBtn.textContent = 'Capture to Spelflow';
+    captureBtn.style.background = 'oklch(0.50 0.18 193)';
+    delete captureBtn.dataset['captured'];
+    openBtn.style.display = 'none';
+  }, 5000);
+}
+
+function showFeedback(btn: HTMLButtonElement, text: string, color: string) {
+  const prev = btn.textContent ?? '';
+  const prevBg = btn.style.background;
+  btn.textContent = text;
+  btn.style.background = color;
+  setTimeout(() => {
+    btn.textContent = prev;
+    btn.style.background = prevBg;
+  }, 2000);
 }
