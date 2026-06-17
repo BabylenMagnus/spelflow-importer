@@ -28,6 +28,15 @@ export async function getProjects(workspaceUrl: string): Promise<SpelflowProject
   return res.json();
 }
 
+export async function listIssues(
+  workspaceUrl: string,
+  projectIdentifier: string
+): Promise<{ id: string; identifier: string; title: string; description: string }[]> {
+  const res = await authFetch(`/workspaces/${workspaceUrl}/projects/${projectIdentifier}/issues`);
+  if (!res.ok) throw new Error(`listIssues failed: ${res.status}`);
+  return res.json();
+}
+
 export async function createIssue(
   workspaceUrl: string,
   projectIdentifier: string,

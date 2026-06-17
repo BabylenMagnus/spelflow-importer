@@ -1,7 +1,7 @@
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
 import { reviewBasket, lastWorkspace } from '../utils/storage';
 import type { CapturedIssue } from '../utils/types';
-import { htmlToMarkdown } from '../utils/html-to-markdown';
+import { extractTaskContent, parseTaskIdFromUrl } from '../utils/gitverse';
 
 export default defineContentScript({
   matches: ['*://gitverse.ru/*/*/tasktracker/*'],
@@ -55,31 +55,23 @@ function keepButtonAlive() {
 }
 
 function isTaskPage(): boolean {
-  return /\/tasktracker\/[A-Z][A-Z0-9]+-\d+/.test(location.pathname);
+  return parseTaskIdFromUrl(location.pathname) !== null;
 }
 
 function extractIssue(): CapturedIssue | null {
-  const titleEl = document.querySelector<HTMLElement>('h3.text-h3');
-  const title = titleEl?.textContent?.trim();
-  if (!title) return null;
+  const taskId = parseTaskIdFromUrl(location.pathname);
+  if (!taskId) return null;
 
-  const taskId = location.pathname.split('/').pop();
-  if (!taskId || !/^[A-Z][A-Z0-9]+-\d+$/.test(taskId)) return null;
-
-  // Gitverse renders the description as a CSS-module class containing "editorContent"
-  // (e.g. text-editor-preview_editorContent__7DXuu) — the hash suffix is build-specific,
-  // so match on the stable substring instead of the full class name.
-  const bodyEl = document.querySelector<HTMLElement>('[class*="editorContent"]');
-
-  const body = bodyEl ? htmlToMarkdown(bodyEl.innerHTML) : '';
+  const content = extractTaskContent(document);
+  if (!content) return null;
 
   return {
     id: `gitverse-${taskId}-${Date.now()}`,
     provider: 'gitverse-tasktracker',
     externalId: taskId,
     externalUrl: location.href,
-    title,
-    body,
+    title: content.title,
+    body: content.body,
     labels: [],
     capturedAt: Date.now(),
   };
