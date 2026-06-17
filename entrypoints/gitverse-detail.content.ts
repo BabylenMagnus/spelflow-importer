@@ -1,6 +1,7 @@
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
 import { reviewBasket, lastWorkspace } from '../utils/storage';
 import type { CapturedIssue } from '../utils/types';
+import { htmlToMarkdown } from '../utils/html-to-markdown';
 
 export default defineContentScript({
   matches: ['*://gitverse.ru/*/*/tasktracker/*'],
@@ -65,18 +66,29 @@ function extractIssue(): CapturedIssue | null {
   const taskId = location.pathname.split('/').pop();
   if (!taskId || !/^[A-Z][A-Z0-9]+-\d+$/.test(taskId)) return null;
 
+  const DESCRIPTION_SELECTORS = [
+    '[class*="description-content"]',
+    '[class*="task-description"]',
+    '[class*="issue-description"]',
+    '.markdown-body',
+    '.markup',
+    '.render-content',
+  ];
+
   const mainEl = document.querySelector('main');
-  const body = mainEl
-    ? Array.from(mainEl.querySelectorAll<HTMLElement>('p, li'))
-        .map((el) => el.textContent?.trim())
-        .filter((t) => t && t.length > 0)
-        .slice(0, 20)
-        .join('\n')
-    : '';
+  let bodyEl: HTMLElement | null = null;
+  for (const sel of DESCRIPTION_SELECTORS) {
+    bodyEl = mainEl?.querySelector<HTMLElement>(sel)
+      ?? document.querySelector<HTMLElement>(sel);
+    if (bodyEl) break;
+  }
+  if (!bodyEl) bodyEl = mainEl;
+
+  const body = bodyEl ? htmlToMarkdown(bodyEl.innerHTML) : '';
 
   return {
     id: `gitverse-${taskId}-${Date.now()}`,
-    provider: 'gitverse',
+    provider: 'gitverse-tasktracker',
     externalId: taskId,
     externalUrl: location.href,
     title,
