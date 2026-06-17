@@ -1,7 +1,7 @@
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
 import { reviewBasket, lastWorkspace, lastProject } from '../utils/storage';
 import { listIssues } from '../utils/spelflow-api';
-import { extractTaskContent, parseTaskIdFromUrl } from '../utils/gitverse';
+import { fetchTaskContent, parseTaskIdFromUrl } from '../utils/gitverse';
 import type { CapturedIssue } from '../utils/types';
 
 export default defineContentScript({
@@ -200,15 +200,10 @@ async function captureAll() {
     let title = row.title;
     let body = '';
     try {
-      const res = await fetch(row.url);
-      if (res.ok) {
-        const html = await res.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const content = extractTaskContent(doc);
-        if (content) {
-          title = content.title;
-          body = content.body;
-        }
+      const content = await fetchTaskContent(row.taskId);
+      if (content) {
+        title = content.title;
+        body = content.body;
       }
     } catch {
       // Network hiccup on one task shouldn't abort the whole batch — fall

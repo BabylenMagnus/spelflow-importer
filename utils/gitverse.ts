@@ -26,3 +26,21 @@ export function extractTaskContent(doc: ParentNode): GitverseTaskContent | null 
 
   return { title, body };
 }
+
+interface UnitV2Response {
+  summary?: string;
+  description?: string;
+}
+
+// The task detail page hydrates its content client-side after an XHR to this
+// endpoint — a plain fetch() of the page HTML never contains the description,
+// only the post-hydration DOM does. This same-origin JSON endpoint returns the
+// task data directly (description already as markdown, no Turndown needed),
+// so background bulk-capture can use it instead of fetching + parsing HTML.
+export async function fetchTaskContent(taskId: string): Promise<GitverseTaskContent | null> {
+  const res = await fetch(`https://gitverse.ru/swtr/rest/api/unit/v2/${taskId}`);
+  if (!res.ok) return null;
+  const data: UnitV2Response = await res.json();
+  if (!data.summary) return null;
+  return { title: data.summary, body: data.description ?? '' };
+}
