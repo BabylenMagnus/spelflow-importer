@@ -66,23 +66,10 @@ function extractIssue(): CapturedIssue | null {
   const taskId = location.pathname.split('/').pop();
   if (!taskId || !/^[A-Z][A-Z0-9]+-\d+$/.test(taskId)) return null;
 
-  const DESCRIPTION_SELECTORS = [
-    '[class*="description-content"]',
-    '[class*="task-description"]',
-    '[class*="issue-description"]',
-    '.markdown-body',
-    '.markup',
-    '.render-content',
-  ];
-
-  const mainEl = document.querySelector('main');
-  let bodyEl: HTMLElement | null = null;
-  for (const sel of DESCRIPTION_SELECTORS) {
-    bodyEl = mainEl?.querySelector<HTMLElement>(sel)
-      ?? document.querySelector<HTMLElement>(sel);
-    if (bodyEl) break;
-  }
-  if (!bodyEl) bodyEl = mainEl;
+  // Gitverse renders the description as a CSS-module class containing "editorContent"
+  // (e.g. text-editor-preview_editorContent__7DXuu) — the hash suffix is build-specific,
+  // so match on the stable substring instead of the full class name.
+  const bodyEl = document.querySelector<HTMLElement>('[class*="editorContent"]');
 
   const body = bodyEl ? htmlToMarkdown(bodyEl.innerHTML) : '';
 
